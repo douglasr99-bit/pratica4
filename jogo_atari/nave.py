@@ -2,7 +2,7 @@
 
 # pyrefly: ignore [missing-import]
 import pygame
-from jogo_atari.config import (
+from config import (
     LARGURA_TELA, ALTURA_TELA, COR_NAVE,
     VELOCIDADE_NAVE, NAVE_LARGURA, NAVE_ALTURA
 )

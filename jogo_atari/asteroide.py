@@ -4,7 +4,7 @@
 import pygame
 import random
 import math
-from jogo_atari.config import (
+from config import (
     LARGURA_TELA, ALTURA_TELA, COR_ASTEROIDE,
     VELOCIDADE_ASTEROIDE, ASTEROIDE_TAMANHO_MIN, ASTEROIDE_TAMANHO_MAX
 )

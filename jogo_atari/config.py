@@ -28,7 +28,7 @@ COR_ESTRELA = (200, 200, 255)
 
 # ===================== VELOCIDADES =====================
 # Velocidade de movimento lateral da nave (pixels por frame)
-VELOCIDADE_NAVE = 6
+VELOCIDADE_NAVE = 10
 
 # Velocidade dos projéteis subindo (pixels por frame)
 VELOCIDADE_PROJETIL = 8

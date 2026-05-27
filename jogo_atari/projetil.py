@@ -2,7 +2,7 @@
 
 # pyrefly: ignore [missing-import]
 import pygame
-from jogo_atari.config import VELOCIDADE_PROJETIL, PROJETIL_RAIO, COR_PROJETIL
+from config import VELOCIDADE_PROJETIL, PROJETIL_RAIO, COR_PROJETIL
 
 
 class Projetil:
