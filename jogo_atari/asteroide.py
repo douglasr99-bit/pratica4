@@ -16,7 +16,7 @@ class Asteroide:
     para simular uma rocha espacial no estilo Atari.
     """
 
-    def __init__(self):
+    def __init__(self, pontuacao=0):
         # Tamanho aleatório dentro da faixa configurada
         self.raio = random.randint(ASTEROIDE_TAMANHO_MIN, ASTEROIDE_TAMANHO_MAX)
 
@@ -24,7 +24,10 @@ class Asteroide:
         self.x = random.randint(self.raio, LARGURA_TELA - self.raio)
         self.y = -self.raio
 
-        self.velocidade = VELOCIDADE_ASTEROIDE
+        # Velocidade aumenta com a pontuação:
+        # A cada 50 pontos, ganha +0.5 de velocidade (máximo 3x a velocidade base)
+        bonus = min((pontuacao // 50) * 0.5, VELOCIDADE_ASTEROIDE * 2)
+        self.velocidade = VELOCIDADE_ASTEROIDE + bonus
 
         # Gera os vértices do polígono irregular (forma de rocha)
         self.vertices = self._gerar_vertices()

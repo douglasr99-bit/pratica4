@@ -145,7 +145,7 @@ def jogo():
 
         # ---------- SPAWN DE ASTEROIDES ----------
         if agora - ultimo_asteroide >= INTERVALO_ASTEROIDE:
-            asteroides.append(Asteroide())
+            asteroides.append(Asteroide(pontuacao))
             ultimo_asteroide = agora
 
         # ---------- ATUALIZAÇÃO DAS ENTIDADES ----------
