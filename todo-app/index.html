@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Gerenciador de Tarefas</title>
+  <meta name="description" content="Aplicação elegante de gerenciamento de tarefas com autenticação local." />
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            dark: { 900: '#0f172a', 800: '#1e293b', 700: '#334155', 600: '#475569' },
+            accent: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' },
+            success: { 400: '#34d399', 500: '#10b981' },
+            danger: { 400: '#f87171', 500: '#ef4444' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background: #0f172a; font-family: 'Inter', sans-serif; }
+    .glass {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+    .glass-input {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .glass-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      outline: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      transition: transform 0.2s, box-shadow 0.3s, opacity 0.3s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost {
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { background: rgba(99, 102, 241, 0.1); color: #818cf8; }
+    .screen { display: none; animation: fadeIn 0.4s ease; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    .todo-item { animation: slideIn 0.3s ease; }
+  </style>
+</head>
+<body class="min-h-screen text-gray-200 flex items-center justify-center p-4">
+
+  <!-- =============== TELA DE LOGIN =============== -->
+  <div id="screen-login" class="screen active flex-col items-center w-full max-w-md">
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">TaskFlow</h1>
+      <p class="text-gray-400 mt-2 text-sm tracking-wide">Gerencie suas tarefas com elegância</p>
+    </div>
+    <div class="glass rounded-2xl p-8 w-full shadow-2xl">
+      <h2 class="text-xl font-semibold text-white mb-6">Entrar na sua conta</h2>
+      <div id="login-error" class="hidden text-danger-400 text-sm mb-4 p-3 rounded-lg bg-danger-400/10 border border-danger-400/20"></div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">E-mail</label>
+          <input id="login-email" type="email" placeholder="seu@email.com"
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500" />
+          <span id="login-email-err" class="text-danger-400 text-xs mt-1 hidden">Informe seu e-mail</span>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Senha</label>
+          <input id="login-password" type="password" placeholder="••••••••"
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500" />
+          <span id="login-password-err" class="text-danger-400 text-xs mt-1 hidden">Informe sua senha</span>
+        </div>
+        <button id="btn-login" class="btn-primary w-full py-3 rounded-xl text-white font-semibold mt-2 cursor-pointer">
+          Entrar
+        </button>
+      </div>
+      <p class="text-center text-gray-400 text-sm mt-6">
+        Não tem conta?
+        <button id="goto-register" class="btn-ghost text-accent-400 font-medium px-2 py-1 rounded-lg cursor-pointer">Cadastre-se</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- =============== TELA DE CADASTRO =============== -->
+  <div id="screen-register" class="screen flex-col items-center w-full max-w-md">
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">TaskFlow</h1>
+      <p class="text-gray-400 mt-2 text-sm tracking-wide">Crie sua conta gratuita</p>
+    </div>
+    <div class="glass rounded-2xl p-8 w-full shadow-2xl">
+      <h2 class="text-xl font-semibold text-white mb-6">Criar nova conta</h2>
+      <div id="register-error" class="hidden text-danger-400 text-sm mb-4 p-3 rounded-lg bg-danger-400/10 border border-danger-400/20"></div>
+      <div id="register-success" class="hidden text-success-400 text-sm mb-4 p-3 rounded-lg bg-success-400/10 border border-success-400/20"></div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Nome</label>
+          <input id="register-name" type="text" placeholder="Seu nome"
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500" />
+          <span id="register-name-err" class="text-danger-400 text-xs mt-1 hidden">Informe seu nome</span>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">E-mail</label>
+          <input id="register-email" type="email" placeholder="seu@email.com"
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500" />
+          <span id="register-email-err" class="text-danger-400 text-xs mt-1 hidden">Informe um e-mail válido</span>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Senha</label>
+          <input id="register-password" type="password" placeholder="Mínimo 6 caracteres"
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500" />
+          <span id="register-password-err" class="text-danger-400 text-xs mt-1 hidden">Senha deve ter no mínimo 6 caracteres</span>
+        </div>
+        <button id="btn-register" class="btn-primary w-full py-3 rounded-xl text-white font-semibold mt-2 cursor-pointer">
+          Criar conta
+        </button>
+      </div>
+      <p class="text-center text-gray-400 text-sm mt-6">
+        Já tem conta?
+        <button id="goto-login" class="btn-ghost text-accent-400 font-medium px-2 py-1 rounded-lg cursor-pointer">Faça login</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- =============== TELA DO DASHBOARD =============== -->
+  <div id="screen-dashboard" class="screen flex-col items-center w-full max-w-2xl">
+    <!-- Cabeçalho -->
+    <div class="w-full flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Olá, <span id="user-name" class="bg-gradient-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent font-semibold"></span> 👋</h1>
+        <p class="text-gray-400 text-sm mt-1">Organize seu dia a dia de forma inteligente</p>
+      </div>
+      <button id="btn-logout" class="btn-ghost text-gray-400 text-sm px-4 py-2 rounded-xl border border-gray-700 cursor-pointer hover:border-danger-400 hover:text-danger-400 transition-colors">
+        Sair
+      </button>
+    </div>
+
+    <!-- Criar tarefa com formulário avançado -->
+    <div class="glass rounded-2xl p-6 w-full mb-6 shadow-xl">
+      <h3 class="text-lg font-semibold text-white mb-4">Nova Tarefa</h3>
+      <form id="todo-form" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Título da Tarefa *</label>
+          <input id="todo-title" type="text" placeholder="O que você precisa fazer?"
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500" />
+          <span id="todo-title-err" class="text-danger-400 text-xs mt-1 hidden">Título é obrigatório</span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm text-gray-400 mb-1.5">Tipo da Tarefa</label>
+            <select id="todo-type" class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 cursor-pointer">
+              <option value="Trabalho" selected>💼 Trabalho</option>
+              <option value="Pessoal">🏠 Pessoal</option>
+              <option value="Estudos">📚 Estudos</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Descrição (opcional)</label>
+          <textarea id="todo-description" rows="3" placeholder="Detalhes adicionais sobre a tarefa..."
+            class="glass-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 resize-none"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-semibold cursor-pointer">
+          Adicionar Tarefa
+        </button>
+      </form>
+    </div>
+
+    <!-- Lista de tarefas -->
+    <div class="w-full">
+      <h3 class="text-lg font-semibold text-white mb-4">Minhas Tarefas</h3>
+      <div id="todo-list" class="space-y-3"></div>
+      
+      <!-- Estado vazio -->
+      <div id="empty-state" class="hidden w-full text-center py-12 glass rounded-2xl">
+        <div class="text-4xl mb-3">📋</div>
+        <p class="text-gray-400 text-md font-medium">Nenhuma tarefa cadastrada ainda.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
